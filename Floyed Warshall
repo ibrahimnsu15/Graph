@@ -1,0 +1,100 @@
+#include <bits/stdc++.h>
+#define MAX 100000
+using namespace std;
+
+int p[1000][1000];
+int dist[1000][1000];
+map<int,string> valueIndex;
+
+void floydWarshall(map<int,map<int,int> > &W,int n){
+    for (int i = 0; i < n; i++){
+        for (int j = 0; j < n; j++){
+            p[i][j]=-1;
+            if(i==j){
+                dist[i][j]=0;
+                continue;
+            }
+            if(W[i+1][j+1] > 0){
+                dist[i][j] = W[i+1][j+1];
+                p[i][j]=i;
+            }else{
+                dist[i][j]=MAX;
+            }
+        }
+    }
+
+    for (int k = 0; k < n; k++){
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++){
+                if (dist[i][k] + dist[k][j] < dist[i][j] ){
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                    p[i][j]=p[k][j];
+                }
+            }
+        }
+    }
+
+//    for (int i = 0; i < n; i++){
+//        cout<<valueIndex[i+1]<<"\t";
+//        for (int j = 0; j < n; j++){
+//            cout<<"\t"<<dist[i][j];
+//        }
+//        cout<<endl;
+//    }
+}
+
+void PrintPath(int s,int t){
+
+    if(p[s][t]==-1) {
+        return;
+    }else if (p[s][t]==s){
+		cout<<valueIndex[s+1]<<",";
+	}else{
+		PrintPath(s,p[s][t]);
+		PrintPath(p[s][t],t);
+	}
+}
+
+int main()
+{
+     ifstream in("input.txt");
+
+     map<string,int> valueMap;
+     map<int,map<int,int> > W;
+
+     int nodeCount=0;
+     string u,v;
+     int c;
+
+     while(in>>u>>v>>c){
+         //cout<<u<<" "<<v<<" "<<c<<endl;
+         if(valueMap[u]==0){
+            nodeCount++;
+            valueMap[u]=nodeCount;
+            valueIndex[nodeCount]=u;
+         }
+
+         if(valueMap[v]==0){
+            nodeCount++;
+            valueMap[v]=nodeCount;
+            valueIndex[nodeCount]=v;
+         }
+
+         W[valueMap[u]][valueMap[v]]= c;
+
+     }
+
+     floydWarshall(W,nodeCount);
+
+
+    for(int i = 0 ; i < nodeCount ; i++){
+        for(int j = 0 ; j < nodeCount ; j++){
+            if(dist[i][j] != MAX && i!=j){
+                PrintPath(i,j);
+                cout<<valueIndex[j+1]<<" - "<<dist[i][j]<<endl;
+            }
+        }
+    }
+
+     return 0;
+}
